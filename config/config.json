@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "admin-panel-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/adminPanel/AdminPanelWebPart.js",
+          "manifest": "./src/webparts/adminPanel/AdminPanelWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "AdminPanelWebPartStrings": "lib/webparts/adminPanel/loc/{locale}.js"
+  }
+}
