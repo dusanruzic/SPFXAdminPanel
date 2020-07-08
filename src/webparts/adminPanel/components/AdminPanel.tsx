@@ -12,18 +12,19 @@ export default class AdminPanel extends React.Component<IAdminPanelProps, {}> {
   public render(): React.ReactElement<IAdminPanelProps> {
     return (
       <div className={ styles.adminPanel }>
-        <h1>
+        <h1 style={{textAlign: 'center' }}>
           Admin panel
         </h1>
         <Pivot aria-label="All users">
         <PivotItem
           headerText="User group"
+          itemCount='10'
           headerButtonProps={{
             'data-order': 1,
             'data-title': 'Users',
           }}
         >
-          <Users></Users>
+          <Users val="2"></Users>
 
         </PivotItem>
 

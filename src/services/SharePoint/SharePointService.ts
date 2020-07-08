@@ -11,11 +11,9 @@ export class SharePointServiceManager {
     public itemID: number;
     public ideaListID: string;
 
-    public setup(context: WebPartContext, environmentType: EnvironmentType, itemID: number, ideaListID: string): void {
+    public setup(context: WebPartContext, environmentType: EnvironmentType): void {
         this.context = context;
         this.environmentType = environmentType;
-        this.itemID = itemID;
-        this.ideaListID = ideaListID;
     }
 
     public get(relativeEndpointUrl: string): Promise<any> {
@@ -67,6 +65,18 @@ export class SharePointServiceManager {
     
     public getUsers(): Promise<any> {
         return this.get(`/_api/web/siteusers`);
+    }
+
+    public getSoftwareDeveloperGroupMembers() {
+        return this.get(`/_api/Web/SiteGroups/GetByName('SoftwareDeveloper')/users`);
+    }
+
+    public getUserGroupMembers() {
+        return this.get(`/_api/Web/SiteGroups/GetByName('User')/users`);
+    }
+
+    public getAdminGroupMembers() {
+        return this.get(`/_api/Web/SiteGroups/GetByName('Admin')/users`);
     }
 
     public getGroupsOfCurrentUser(): Promise<any> {

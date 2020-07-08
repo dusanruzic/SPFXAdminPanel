@@ -8,7 +8,7 @@ export class Admins extends React.Component<{}, {}> {
     return (
       <div>
 
-        <h1>All admins</h1>>    
+        <h1>All admins</h1>
         
       </div>
     );

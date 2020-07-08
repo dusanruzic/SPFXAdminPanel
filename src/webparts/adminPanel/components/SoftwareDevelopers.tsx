@@ -8,7 +8,7 @@ export class SoftwareDevelopers extends React.Component<{}, {}> {
     return (
       <div>
 
-        <h1>All software developers</h1>>    
+        <h1>All software developers</h1>
         
       </div>
     );

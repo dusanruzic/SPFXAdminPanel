@@ -10,6 +10,8 @@ import {
 import * as strings from 'AdminPanelWebPartStrings';
 import AdminPanel from './components/AdminPanel';
 import { IAdminPanelProps } from './components/IAdminPanelProps';
+import SharePointService from '../../services/SharePoint/SharePointService';
+import {Environment } from '@microsoft/sp-core-library';
 
 export interface IAdminPanelWebPartProps {
   description: string;
@@ -26,6 +28,14 @@ export default class AdminPanelWebPart extends BaseClientSideWebPart<IAdminPanel
     );
 
     ReactDom.render(element, this.domElement);
+  }
+
+  public onInit(): Promise<void> {
+    return super.onInit().then(() =>{
+
+      SharePointService.setup(this.context, Environment.type);
+
+    });
   }
 
   protected onDispose(): void {

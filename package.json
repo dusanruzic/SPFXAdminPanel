@@ -16,16 +16,17 @@
     "@microsoft/sp-office-ui-fabric-core": "^1.8.0",
     "@microsoft/sp-webpart-base": "1.8.0",
     "@types/es6-promise": "0.0.33",
-    "@types/react": "16.4.2",
+    "@types/react": "^16.9.32",
     "@types/react-dom": "16.0.5",
     "@types/webpack-env": "1.13.1",
+    "@uifabric/example-data": "^7.0.17",
     "bootstrap": "^4.5.0",
     "install": "^0.13.0",
     "npm": "^6.14.5",
     "office-ui-fabric-react": "^6.143.0",
-    "react": "16.7.0",
+    "react": "16.8.0",
     "react-bootstrap": "^1.0.1",
-    "react-dom": "16.7.0"
+    "react-dom": "16.8.0"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.3": "0.1.7",
