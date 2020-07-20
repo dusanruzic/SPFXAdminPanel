@@ -34,7 +34,8 @@ export default class AdminPanel extends React.Component<IAdminPanelProps, {}> {
 
         <PivotItem headerText="Admin group">
         <Admins></Admins>
-        </PivotItem>        
+        </PivotItem>   
+    
         
       </Pivot>  
       </div>

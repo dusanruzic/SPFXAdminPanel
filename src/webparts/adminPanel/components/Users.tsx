@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Checkbox } from 'office-ui-fabric-react/lib/Checkbox';
 import { IPersonaProps } from 'office-ui-fabric-react/lib/Persona';
-import { IBasePickerSuggestionsProps, NormalPeoplePicker, ValidationState } from 'office-ui-fabric-react/lib/Pickers';
+import { IBasePickerSuggestionsProps, NormalPeoplePicker, ListPeoplePicker, CompactPeoplePicker, ValidationState } from 'office-ui-fabric-react/lib/Pickers';
 import { people, mru } from '@uifabric/example-data';
 import { Label } from 'office-ui-fabric-react/lib/Label';
-import {  PrimaryButton } from 'office-ui-fabric-react';
+import {  PrimaryButton, SelectedPeopleList } from 'office-ui-fabric-react';
 import SharePointService from '../../../services/SharePoint/SharePointService';
 
 const suggestionProps: IBasePickerSuggestionsProps = {
@@ -23,9 +23,8 @@ const checkboxStyles = {
   },
 };
 
+
 export const Users = (props) => {
-  const [delayResults, setDelayResults] = React.useState(false);
-  const [isPickerDisabled, setIsPickerDisabled] = React.useState(false);
   const [mostRecentlyUsed, setMostRecentlyUsed] = React.useState<IPersonaProps[]>(mru);
   const [peopleList, setPeopleList] = React.useState<IPersonaProps[]>(people);
   
@@ -34,12 +33,18 @@ export const Users = (props) => {
   React.useEffect(() => {
     SharePointService.getSoftwareDeveloperGroupMembers().then(rs => {
       console.log(rs);
+      setPeopleList(rs.value);
+      setMostRecentlyUsed(rs.value);
+      console.log('people list:');
+      console.log(peopleList);
+
     });
   }, []);
 
   //console.log(props);
   
   const onFilterChanged = (
+    
     filterText: string,
     currentPersonas: IPersonaProps[],
     limitResults?: number,
@@ -56,15 +61,14 @@ export const Users = (props) => {
   };
 
   const filterPersonasByText = (filterText: string): IPersonaProps[] => {
+    console.log(peopleList);
     return peopleList.filter(item => doesTextStartWith(item.text as string, filterText));
   };
 
   const filterPromise = (personasToReturn: IPersonaProps[]): IPersonaProps[] | Promise<IPersonaProps[]> => {
-    if (delayResults) {
-      return convertResultsToPromise(personasToReturn);
-    } else {
+     
       return personasToReturn;
-    }
+    
   };
 
   const returnMostRecentlyUsed = (currentPersonas: IPersonaProps[]): IPersonaProps[] | Promise<IPersonaProps[]> => {
@@ -90,18 +94,10 @@ export const Users = (props) => {
     }
   };
 
-  const onDisabledButtonClick = (): void => {
-    setIsPickerDisabled(!isPickerDisabled);
-  };
-
-  const onToggleDelayResultsChange = (): void => {
-    setDelayResults(!delayResults);
-  };
-
   return (
     <div>
         <Label >Choose people</Label>
-      <NormalPeoplePicker
+      <ListPeoplePicker
         onResolveSuggestions={onFilterChanged}
         onEmptyInputFocus={returnMostRecentlyUsed}
         getTextFromItem={getTextFromItem}
@@ -120,18 +116,19 @@ export const Users = (props) => {
         componentRef={picker}
         onInputChange={onInputChange}
         resolveDelay={300}
-        disabled={isPickerDisabled}
       />
 
-        <PrimaryButton text="Add to group" onClick={addToGroup}/>
+        <PrimaryButton text="Add to user group" onClick={_ => addToGroup(peopleList)}/>
 
     </div>
   );
 };
 
-function addToGroup() {
+function addToGroup(peopleList) {
     console.log('dodat u grupu!');
     console.log(document.getElementsByClassName('ms-PeoplePicker'));
+    console.log(peopleList);
+    
 }
 
 function doesTextStartWith(text: string, filterText: string): boolean {
@@ -149,9 +146,6 @@ function listContainsPersona(persona: IPersonaProps, personas: IPersonaProps[]) 
   return personas.filter(item => item.text === persona.text).length > 0;
 }
 
-function convertResultsToPromise(results: IPersonaProps[]): Promise<IPersonaProps[]> {
-  return new Promise<IPersonaProps[]>((resolve, reject) => setTimeout(() => resolve(results), 2000));
-}
 
 function getTextFromItem(persona: IPersonaProps): string {
   return persona.text as string;

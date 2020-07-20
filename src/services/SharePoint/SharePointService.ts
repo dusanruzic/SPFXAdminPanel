@@ -114,6 +114,33 @@ export class SharePointServiceManager {
         });
     }
 
+    public addUserToSoftwareDeveloperGroup(loginName) {
+        const body = JSON.stringify({
+            '__metadata': {
+                'type': 'SP.User'
+            },
+            'LoginName': loginName
+        })
+
+        return this.context.spHttpClient.post(`${this.context.pageContext.web.absoluteUrl}/_api/Web/SiteGroups/GetByName('SoftwareDeveloper')/users`, SPHttpClient.configurations.v1,
+        {
+            headers: {
+                'Accept': 'application/json;odata=nometadata',
+                'Content-type': 'application/json;odata=verbose',
+                'odata-version': ''
+            },
+            body: body
+        })
+        .then(
+            response => {
+                return response.json()
+            }
+        )
+        .catch(error => {
+            return Promise.reject(error);
+        });
+    }
+
 
     public updateIdea(name, desc, formula, status){
 
