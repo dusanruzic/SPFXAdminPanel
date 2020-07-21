@@ -8,6 +8,9 @@ import {
   MessageBar,
   MessageBarType
 } from 'office-ui-fabric-react';
+
+import { Dialog, DialogType } from 'office-ui-fabric-react/lib/Dialog';
+
 import {
   DetailsList,
   DetailsListLayoutMode,
@@ -16,7 +19,11 @@ import {
   IColumn,
 } from 'office-ui-fabric-react/lib/DetailsList';
 
-interface ISoftwareDeveloperState {
+interface IUserGroupProps {
+  name: string;
+}
+
+interface IUserGroupState {
   selectedItems: any;
   allPersonsFromGroup: any;
   disabledButton: boolean;
@@ -28,6 +35,7 @@ interface ISoftwareDeveloperState {
   isModalSelection: boolean;
   isCompactMode: boolean;
   announcedMessage?: string;
+  changed: boolean
 }
 export interface IDocument {
   key: string;
@@ -40,7 +48,15 @@ export interface IDocument {
   Modified: string;
   Editor: any;
 }
-export class SoftwareDevelopers extends React.Component<{}, ISoftwareDeveloperState> {
+
+const dialogContentProps = {
+  type: DialogType.largeHeader,
+  title: 'Missing Fields',
+  subText: 'Some required field is not filled. Please provide content to all required fields. ',
+};
+
+
+export class UserGroup extends React.Component<IUserGroupProps, IUserGroupState> {
   private _selection: Selection;
 
   constructor(props) {
@@ -48,7 +64,8 @@ export class SoftwareDevelopers extends React.Component<{}, ISoftwareDeveloperSt
     super(props);
     this.getPeoplePickerItems = this.getPeoplePickerItems.bind(this);
     this.addToGroup = this.addToGroup.bind(this);
-    
+    this.toggleHideDialog = this.toggleHideDialog.bind(this);
+
     const columns: IColumn[] = [
       {
         key: 'column1',
@@ -118,11 +135,14 @@ export class SoftwareDevelopers extends React.Component<{}, ISoftwareDeveloperSt
       isModalSelection: false,
       isCompactMode: false,
       announcedMessage: undefined,
+      changed: false
     }
 
     this._selection = new Selection({
       onSelectionChanged: () => {
-        console.log(this._selection.getSelection())
+        
+      //console.log(this._selection.count);
+      //console.log(this._selection.getSelectedCount());
         
         this.setState({
         });
@@ -131,10 +151,10 @@ export class SoftwareDevelopers extends React.Component<{}, ISoftwareDeveloperSt
 
     
     
-    SharePointService.getSoftwareDeveloperGroupMembers().then(rs => {
-      console.log(rs);
+    SharePointService.getGroupMembers(this.props.name).then(rs => {
+      //console.log(rs);
       let usrs = rs.value.map(a => ({'title': a.Title, 'email': a.Email, 'LoginName': a.LoginName}))
-      console.log(usrs);
+      //console.log(usrs);
       this.setState({
         items: usrs
       })
@@ -145,6 +165,13 @@ export class SoftwareDevelopers extends React.Component<{}, ISoftwareDeveloperSt
   public render(): React.ReactElement<{}> {
     return (
       <div>
+
+          <Dialog
+            hidden={!this.state.changed}
+            onDismiss={this.toggleHideDialog}
+            dialogContentProps= {dialogContentProps}
+            
+          />
 
         {this.state.error &&
           <MessageBar
@@ -160,7 +187,7 @@ export class SoftwareDevelopers extends React.Component<{}, ISoftwareDeveloperSt
 
         <PeoplePicker
         context={SharePointService.context}
-        titleText="Choose people for adding to software developer group"
+        titleText={`Choose people for adding to ${this.props.name} group`}
         personSelectionLimit={3}
         //groupName={"User"} // Leave this blank in case you want to filter from all users
         showtooltip={true}
@@ -170,11 +197,11 @@ export class SoftwareDevelopers extends React.Component<{}, ISoftwareDeveloperSt
         showHiddenInUI={true}
         principalTypes={[PrincipalType.User]}
         resolveDelay={300} 
-        tooltipMessage = "Enter first 3 letters"
+        tooltipMessage = "Enter first 3 letters of name"
         defaultSelectedUsers = {this.state.selectedItems.length == 0 && []}
         />
         
-      <PrimaryButton disabled={this.state.disabledButton}  text="Add to user group" onClick={_ => this.addToGroup()}/>
+      <PrimaryButton disabled={this.state.disabledButton}  text={`Add to ${this.props.name} group`} onClick={_ => this.addToGroup()}/>
 
         <hr></hr>
       
@@ -182,19 +209,18 @@ export class SoftwareDevelopers extends React.Component<{}, ISoftwareDeveloperSt
 
         <div className="ms-Grid-row">
         <span className="ms-Grid-col ms-sm6 ms-md8 ms-lg8 ms-xl8">
-        <Label>SoftwareDeveloper group members</Label>
+        <Label>{this.props.name} group members ({this.state.items.length})  </Label>
         </span>
         <span className="ms-Grid-col ms-sm6 ms-md4 ms-lg4 ms-xl4">
-          <PrimaryButton style={{}} text="Remove from group" onClick={_ => this.removeFromGroup()}/>  
+          <PrimaryButton style={{}} disabled={this._selection.count < 1 || this._selection.count ==  undefined ? true: false} text={`Remove from group`} onClick={_ => this.removeFromGroup()}/>  
         </span>
         </div>
       <DetailsList
               items={this.state.items}
               compact={this.state.isCompactMode}
               columns={this.state.columns}
-              selectionMode={SelectionMode.multiple}
+              selectionMode={SelectionMode.single}
               getKey={this._getKey}
-              setKey="multiple"
               layoutMode={DetailsListLayoutMode.justified}
               isHeaderVisible={true}
               selection={this._selection}
@@ -217,18 +243,18 @@ export class SoftwareDevelopers extends React.Component<{}, ISoftwareDeveloperSt
 
     let err = false;
 
-    console.log('Items:', items);
+    //console.log('Items:', items);
     loop1:
     for (let i = 0; i< items.length; i++){
       loop2:
       for(let j = 0; j< this.state.items.length; j++){
-        console.log(items[i].secondaryText);
-        console.log(this.state.items[j].email);
+        //console.log(items[i].secondaryText);
+        //console.log(this.state.items[j].email);
         if (items[i].secondaryText == this.state.items[j].email){
           err = true;
   
         this.setState({
-          errorMsg: `User ${items[i].secondaryText} is already in software developer group. Please remove this user from people picker`,
+          errorMsg: `User ${items[i].secondaryText} is already in ${this.props.name} group. Please remove this user from people picker`,
           error: true
         })
 
@@ -261,21 +287,38 @@ export class SoftwareDevelopers extends React.Component<{}, ISoftwareDeveloperSt
     //console.log(`treba da se dodaju u grupu sledeci ljudi: (${this.state.selectedItems.length})`);
     //console.log(this.state.selectedItems);
     //console.log(this.state.selectedItems[0].LoginName);
-    SharePointService.addUserToSoftwareDeveloperGroup(this.state.selectedItems[0].loginName).then(rs => {
+    SharePointService.addUserToGroup(this.props.name, this.state.selectedItems[0].loginName).then(rs => {
+      let selected = this.state.selectedItems[0].loginName;
+      if (rs.ok){
+
       this.setState({
         selectedItems: [],
         disabledButton: true,
       })
-      console.log(rs);
-      SharePointService.getSoftwareDeveloperGroupMembers().then(rss => {
-        console.log(rss);
+      //console.log(rs);
+      SharePointService.getGroupMembers(this.props.name).then(rss => {
+        //console.log(rss);
         let usrs = rss.value.map(a => ({'title': a.Title, 'email': a.Email, 'LoginName': a.LoginName}))
-        console.log(usrs);
+        //console.log(usrs);
         this.setState({
           items: usrs
         })
+
+        dialogContentProps.title = 'User successfully added';
+        dialogContentProps.subText = `User ${selected} sucessfully added to ${this.props.name} group`;
+        this.setState({
+          changed: true
+        });
         
       })
+    }
+    else {
+      dialogContentProps.title = 'User cannot be added';
+      dialogContentProps.subText = `User ${selected} is not added to ${this.props.name} group`;
+      this.setState({
+        changed: true
+      });
+    }
     })
     
     
@@ -283,9 +326,39 @@ export class SoftwareDevelopers extends React.Component<{}, ISoftwareDeveloperSt
 
 private removeFromGroup() {
 
+  let userForRemove = this._selection.getSelection()[0]['LoginName'];
+  //console.log(userForRemove);
+  SharePointService.removeUserFromGroup(this.props.name, userForRemove).then(rs => {
+    if (rs.ok){
+    //console.log(rs);
+    SharePointService.getGroupMembers(this.props.name).then(rss => {
+      //console.log(rss);
+      
+        let usrs = rss.value.map(a => ({'title': a.Title, 'email': a.Email, 'LoginName': a.LoginName}))
+      //console.log(usrs);
+      this.setState({
+        items: usrs
+      });
+
+      dialogContentProps.title = 'User successfully removed';
+        dialogContentProps.subText = `User ${userForRemove} sucessfully removed from ${this.props.name} group`;
+        this.setState({
+          changed: true
+        });
+      
+    });
+  }
+  else {
+    dialogContentProps.title = 'User cannot be removed';
+    dialogContentProps.subText = `User ${userForRemove} is not removed from ${this.props.name} group`;
+    this.setState({
+      changed: true
+    });
+  }
+  });
 }
 
-public componentDidUpdate(previousProps: any, previousState: ISoftwareDeveloperState) {
+public componentDidUpdate(previousProps: any, previousState: IUserGroupState) {
   if (previousState.isModalSelection !== this.state.isModalSelection && !this.state.isModalSelection) {
     this._selection.setAllSelected(false);
   }
@@ -306,7 +379,7 @@ private _getSelectionDetails(): string {
     case 0:
       return 'No items selected';
     case 1:
-      console.log('1 item selected: ' + (this._selection.getSelection()[0] as IDocument).Title)
+      //console.log('1 item selected: ' + (this._selection.getSelection()[0] as IDocument).Title)
       return '1 item selected: ' + (this._selection.getSelection()[0] as IDocument).Title;
     default:
       return `${selectionCount} items selected`;
@@ -336,6 +409,14 @@ private _onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): v
     columns: newColumns,
     items: newItems,
   });
+}
+
+public toggleHideDialog() {
+  let has_changed = !this.state.changed;
+
+  this.setState({
+    changed: has_changed
+  })
 }
 }
 

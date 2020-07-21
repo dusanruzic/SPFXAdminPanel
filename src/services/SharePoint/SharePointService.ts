@@ -67,16 +67,8 @@ export class SharePointServiceManager {
         return this.get(`/_api/web/siteusers`);
     }
 
-    public getSoftwareDeveloperGroupMembers() {
-        return this.get(`/_api/Web/SiteGroups/GetByName('SoftwareDeveloper')/users`);
-    }
-
-    public getUserGroupMembers() {
-        return this.get(`/_api/Web/SiteGroups/GetByName('User')/users`);
-    }
-
-    public getAdminGroupMembers() {
-        return this.get(`/_api/Web/SiteGroups/GetByName('Admin')/users`);
+    public getGroupMembers(groupName: string) {
+        return this.get(`/_api/Web/SiteGroups/GetByName('${groupName}')/users`);
     }
 
     public getGroupsOfCurrentUser(): Promise<any> {
@@ -114,7 +106,7 @@ export class SharePointServiceManager {
         });
     }
 
-    public addUserToSoftwareDeveloperGroup(loginName) {
+    public addUserToGroup(groupName, loginName) {
         const body = JSON.stringify({
             '__metadata': {
                 'type': 'SP.User'
@@ -122,7 +114,7 @@ export class SharePointServiceManager {
             'LoginName': loginName
         })
 
-        return this.context.spHttpClient.post(`${this.context.pageContext.web.absoluteUrl}/_api/Web/SiteGroups/GetByName('SoftwareDeveloper')/users`, SPHttpClient.configurations.v1,
+        return this.context.spHttpClient.post(`${this.context.pageContext.web.absoluteUrl}/_api/Web/SiteGroups/GetByName('${groupName}')/users`, SPHttpClient.configurations.v1,
         {
             headers: {
                 'Accept': 'application/json;odata=nometadata',
@@ -133,10 +125,39 @@ export class SharePointServiceManager {
         })
         .then(
             response => {
-                return response.json()
+                return response
             }
         )
         .catch(error => {
+            return Promise.reject(error);
+        });
+    }
+
+    public removeUserFromGroup(groupName, loginName) {
+        const body = JSON.stringify({
+            //'__metadata': {
+            //    'type': 'SP.User'
+            //},
+            'loginName': loginName
+        });
+
+        return this.context.spHttpClient.post(`${this.context.pageContext.web.absoluteUrl}/_api/Web/SiteGroups/GetByName('${groupName}')/users/removeByLoginName`, SPHttpClient.configurations.v1,
+        {
+            headers: {
+                'Accept': 'application/json;odata=nometadata',
+                'Content-type': 'application/json;odata=verbose',
+                'odata-version': ''
+            },
+            body: body
+        })
+        .then(
+            response => {
+                //console.log(response);
+                return response
+            }
+        )
+        .catch(error => {
+            //console.log(error);
             return Promise.reject(error);
         });
     }

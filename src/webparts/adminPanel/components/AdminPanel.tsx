@@ -4,9 +4,7 @@ import { IAdminPanelProps } from './IAdminPanelProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import { Pivot, PivotItem } from 'office-ui-fabric-react/lib/Pivot';
 import SharePointService from '../../../services/SharePoint/SharePointService';
-import {Users} from './Users';
-import {SoftwareDevelopers} from './SoftwareDevelopers';
-import {Admins} from './Admins';
+import {UserGroup} from './UserGroup';
 
 export default class AdminPanel extends React.Component<IAdminPanelProps, {}> {
   public render(): React.ReactElement<IAdminPanelProps> {
@@ -18,22 +16,22 @@ export default class AdminPanel extends React.Component<IAdminPanelProps, {}> {
         <Pivot aria-label="All users">
         <PivotItem
           headerText="User group"
-          itemCount='10'
+          
           headerButtonProps={{
             'data-order': 1,
             'data-title': 'Users',
           }}
         >
-          <Users val="2"></Users>
+          <UserGroup name="User"></UserGroup>
 
         </PivotItem>
 
-        <PivotItem headerText="Software developer group">
-        <SoftwareDevelopers></SoftwareDevelopers>
+        <PivotItem headerText="SoftwareDeveloper group">
+        <UserGroup name="SoftwareDeveloper"></UserGroup>
         </PivotItem>
 
         <PivotItem headerText="Admin group">
-        <Admins></Admins>
+        <UserGroup name="Admin"></UserGroup>
         </PivotItem>   
     
         
